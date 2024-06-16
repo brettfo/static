@@ -1,0 +1,162 @@
+<html>
+
+<head>
+  <title>Worksheets</title>
+  <style>
+    table {
+      font-size: x-large;
+    }
+
+    .operand1 {
+      text-align: right;
+    }
+
+    .operand2 {
+      text-align: right;
+    }
+
+    .problem {
+      width: auto;
+      margin-left: auto;
+      margin-right: 0px;
+      text-align: right;
+    }
+
+    .problem-table {
+      border-bottom: 1px solid black;
+      margin: 40px;
+      margin-bottom: 80px;
+    }
+
+    @media print {
+      .controls {
+        display: none;
+      }
+    }
+  </style>
+  <script type="text/javascript">
+
+    function createProblemValues(op, a, b) {
+      switch (op) {
+        case '+':
+          return [a, b];
+        case '-':
+          return [a + b, a];
+        case '*':
+          return [a, b];
+        default:
+          return [a, b];
+      }
+    }
+
+    function createOperatorSymbol(op) {
+      switch (op) {
+        case '+':
+          return '+';
+        case '-':
+          return '-';
+        case '*':
+          return '\u00D7';
+        default:
+          return '+';
+      }
+    }
+
+    function getMinMaxValues() {
+      const operandSize = document.getElementById('operand-size-select').value;
+      switch (operandSize) {
+        case 'single':
+          return [0, 9];
+        case 'double':
+          return [10, 99];
+        default:
+          return [0, 9];
+      }
+    }
+
+    function createProblemTable() {
+      const [minNumber, maxNumber] = getMinMaxValues();
+
+      const operation = document.getElementById('operation-select').value;
+      const a = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+      const b = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+      const [v1, v2] = createProblemValues(operation, a, b);
+      const operator = createOperatorSymbol(operation);
+
+      const table = document.createElement('table');
+      table.classList.add('problem-table');
+
+      // top value
+      const tr1 = document.createElement('tr');
+      tr1.appendChild(document.createElement('td')); // blank element for spacing
+      const td1 = document.createElement('td');
+      td1.classList.add('operand1');
+      td1.innerText = `${v1}`;
+      tr1.appendChild(td1);
+      table.appendChild(tr1);
+
+      // bottom value
+      const tr2 = document.createElement('tr');
+      const td21 = document.createElement('td');
+      td21.innerText = `${operator}`;
+      tr2.appendChild(td21);
+      const td2 = document.createElement('td');
+      td2.classList.add('operand2');
+      td2.innerText = `${v2}`;
+      tr2.appendChild(td2);
+      table.appendChild(tr2);
+
+      return table;
+    }
+
+    function createWorksheet() {
+      const rows = 5;
+      const columns = 5;
+
+      const table = document.getElementById('problems');
+      table.innerHTML = '';
+      for (let r = 0; r < rows; r++) {
+        const tr = document.createElement('tr');
+        for (let c = 0; c < columns; c++) {
+          const td = document.createElement('td');
+          td.classList.add('problem');
+          td.appendChild(createProblemTable());
+          tr.appendChild(td);
+        }
+
+        table.appendChild(tr);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      document.getElementById('operand-size-select').addEventListener('change', () => createWorksheet());
+      document.getElementById('operation-select').addEventListener('change', () => createWorksheet());
+      createWorksheet();
+    });
+  </script>
+</head>
+
+<body>
+
+  <!-- add a dropdown -->
+  <div class="controls">
+    <label for="operand-size-select">Operand type:</label>
+    <select name="operand-size" id="operand-size-select">
+      <option value="single" selected="true">Single digit</option>
+      <option value="double">Double digit</option>
+    </select>
+    <label for="operation-select">Operation:</label>
+    <select name="operation" id="operation-select">
+      <option value="+" selected="true">Addition</option>
+      <option value="-">Subtraction</option>
+      <option value="*">Multiplication</option>
+    </select>
+    <button onclick="createWorksheet()">Regenerate</button>
+    <button onclick="print()">Print...</button>
+  </div>
+
+  <table id="problems"></table>
+
+</body>
+
+</html>
