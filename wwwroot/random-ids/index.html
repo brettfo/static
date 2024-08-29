@@ -1,0 +1,99 @@
+<html>
+
+<head>
+  <style>
+    label {
+      display: block;
+    }
+
+    textarea {
+      display: block;
+    }
+
+    .column {
+      float: left;
+      width: 150px;
+    }
+
+    .row:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+  </style>
+  <script type="text/javascript">
+    const codesToGenerate = 100;
+    function shuffle(array) {
+      let currentIndex = array.length;
+      while (currentIndex != 0) {
+        const randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+      }
+    }
+    function generate() {
+      const candidateIds = new Set([]);
+      const codeLength = parseInt(document.getElementById('code-length-select').value);
+      const maxCodeValue = Math.pow(10, codeLength) - 1;
+      for (let candidateId = 0; candidateId <= maxCodeValue; candidateId++) {
+        candidateIds.add(String(candidateId).padStart(codeLength, '0'));
+      }
+
+      const currentIds = document.getElementById('current-codes').value.split('\n').filter(x => x.length > 0 && parseInt(x) != NaN);
+      currentIds.forEach(id => {
+        candidateIds.delete(id.padStart(codeLength, '0'));
+      });
+
+      ["sacred-codes-1", "sacred-codes-2"].forEach(listId => {
+        const sacredIds = document.getElementById(listId).value.split('\n').filter(x => x.length > 0 && parseInt(x) != NaN);
+        sacredIds.forEach(id => {
+          candidateIds.delete(id.padStart(codeLength, '0'));
+        });
+      });
+
+      const availableIds = Array.from(candidateIds);
+      shuffle(availableIds);
+      const newIds = availableIds.slice(0, codesToGenerate);
+      document.getElementById('new-codes').value = newIds/*.map(id => `"${id}"`)*/.join('\n');
+    }
+
+    function copyCodes() {
+      const content = document.getElementById('new-codes').value;
+      navigator.clipboard.writeText(content);
+    }
+  </script>
+</head>
+
+<body>
+  <div class="row">
+    <div class="column">
+      <label for="current-codes">Current Codes</label>
+      <textarea id="current-codes" rows="50" cols="10"></textarea>
+
+      <label for="code-length-select">Generated code length</label>
+      <select name="code-length" id="code-length-select">
+        <option value="4" selected="true">4</option>
+        <option value="5">5</option>
+      </select>
+      <br />
+      <button onclick="generate()">Generate</button>
+    </div>
+    <div class="column">
+      <label for="sacred-codes-1">Deactivated Codes</label>
+      <textarea id="sacred-codes-1" rows="50" cols="10"></textarea>
+    </div>
+    <div class="column">
+      <label for="sacred-codes-2">Sacred Codes</label>
+      <textarea id="sacred-codes-2" rows="50" cols="10"></textarea>
+    </div>
+    <div class="column">
+      <label for="new-codes">New Codes</label>
+      <textarea id="new-codes" rows="50" cols="10" readonly></textarea>
+
+      <button onclick="copyCodes()">Copy</button>
+    </div>
+  </div>
+</body>
+
+</html>
