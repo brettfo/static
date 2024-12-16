@@ -33,22 +33,36 @@
       }
     }
     function generate() {
+      // generate all possible ids as `candidateIds`
       const candidateIds = new Set([]);
-      const codeLength = parseInt(document.getElementById('code-length-select').value);
+      const shortCodeLength = 4;
+      const codeLength = 5;
       const maxCodeValue = Math.pow(10, codeLength) - 1;
       for (let candidateId = 0; candidateId <= maxCodeValue; candidateId++) {
         candidateIds.add(String(candidateId).padStart(codeLength, '0'));
       }
 
-      const currentIds = document.getElementById('current-codes').value.split('\n').filter(x => x.length > 0 && parseInt(x) != NaN);
-      currentIds.forEach(id => {
-        candidateIds.delete(id.padStart(codeLength, '0'));
-      });
-
-      ["sacred-codes-1", "sacred-codes-2"].forEach(listId => {
+      // remove anything not allowed
+      ["current-codes", "sacred-codes-1", "sacred-codes-2"].forEach(listId => {
         const sacredIds = document.getElementById(listId).value.split('\n').filter(x => x.length > 0 && parseInt(x) != NaN);
         sacredIds.forEach(id => {
-          candidateIds.delete(id.padStart(codeLength, '0'));
+          // remove matching codes
+          if (candidateIds.delete(id.padStart(codeLength, '0'))) {
+            console.log(`Removed code ${id} because it was in the sacred list`);
+          }
+
+
+          // also remove all codes that are a prefix of this code
+          const idString = id.toString();
+          if (idString.length < codeLength) {
+            const shortIdString = id.padStart(shortCodeLength, '0');
+            candidateIds.forEach(candidateId => {
+              if (candidateId.startsWith(shortIdString)) {
+                candidateIds.delete(candidateId);
+                console.log(`Removed code ${candidateId} because it had a prefix match with ${shortIdString}`);
+              }
+            });
+          }
         });
       });
 
@@ -71,12 +85,6 @@
       <label for="current-codes">Current Codes</label>
       <textarea id="current-codes" rows="50" cols="10"></textarea>
 
-      <label for="code-length-select">Generated code length</label>
-      <select name="code-length" id="code-length-select">
-        <option value="4" selected="true">4</option>
-        <option value="5">5</option>
-      </select>
-      <br />
       <button onclick="generate()">Generate</button>
     </div>
     <div class="column">
