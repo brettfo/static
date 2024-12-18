@@ -32,7 +32,17 @@
         [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
       }
     }
-    function generate() {
+    function generateFromDocument() {
+      let forbiddenText = '';
+      ["current-codes", "sacred-codes-1", "sacred-codes-2"].forEach(listId => {
+        forbiddenText += document.getElementById(listId).value + '\n';
+      });
+
+      const newIds = generate(forbiddenText, codesToGenerate);
+      document.getElementById('new-codes').value = newIds.join('\n');
+    }
+
+    function generate(forbiddenText, maxLength) {
       // generate all possible ids as `candidateIds`
       const candidateIds = new Set([]);
       const shortCodeLength = 4;
@@ -43,38 +53,73 @@
       }
 
       // remove anything not allowed
-      ["current-codes", "sacred-codes-1", "sacred-codes-2"].forEach(listId => {
-        const sacredIds = document.getElementById(listId).value.split('\n').filter(x => x.length > 0 && parseInt(x) != NaN);
-        sacredIds.forEach(id => {
-          // remove matching codes
-          if (candidateIds.delete(id.padStart(codeLength, '0'))) {
-            console.log(`Removed code ${id} because it was in the sacred list`);
-          }
+      const sacredIds = forbiddenText.split('\n').filter(x => x.length > 0 && parseInt(x) != NaN);
+      sacredIds.forEach(id => {
+        // remove matching codes
+        if (candidateIds.delete(id.padStart(codeLength, '0'))) {
+          console.log(`Removed code ${id} because it was in the sacred list`);
+        }
 
 
-          // also remove all codes that are a prefix of this code
-          const idString = id.toString();
-          if (idString.length < codeLength) {
-            const shortIdString = id.padStart(shortCodeLength, '0');
-            candidateIds.forEach(candidateId => {
-              if (candidateId.startsWith(shortIdString)) {
-                candidateIds.delete(candidateId);
-                console.log(`Removed code ${candidateId} because it had a prefix match with ${shortIdString}`);
-              }
-            });
-          }
-        });
+        // also remove all codes that are a prefix of this code
+        const idString = id.toString();
+        if (idString.length < codeLength) {
+          const shortIdString = id.padStart(shortCodeLength, '0');
+          candidateIds.forEach(candidateId => {
+            if (candidateId.startsWith(shortIdString)) {
+              candidateIds.delete(candidateId);
+              console.log(`Removed code ${candidateId} because it had a prefix match with ${shortIdString}`);
+            }
+          });
+        }
       });
 
       const availableIds = Array.from(candidateIds);
       shuffle(availableIds);
-      const newIds = availableIds.slice(0, codesToGenerate);
-      document.getElementById('new-codes').value = newIds/*.map(id => `"${id}"`)*/.join('\n');
+      const newIds = availableIds.slice(0, maxLength);
+      return newIds;
     }
 
     function copyCodes() {
       const content = document.getElementById('new-codes').value;
       navigator.clipboard.writeText(content);
+    }
+
+    function test() {
+      const forbiddenText = `
+1234
+5678
+11238
+`;
+      const newIds = generate(forbiddenText, 100000); // keep them all
+      const errorCodes = [
+        '12340',
+        '12341',
+        '12342',
+        '12343',
+        '12344',
+        '12345',
+        '12346',
+        '12347',
+        '12348',
+        '12349',
+        '56780',
+        '56781',
+        '56782',
+        '56783',
+        '56784',
+        '56785',
+        '56786',
+        '56787',
+        '56788',
+        '56789',
+        '11238'
+      ];
+      errorCodes.forEach(code => {
+        if (newIds.includes(code)) {
+          console.error(`${code} is in the list`);
+        }
+      });
     }
   </script>
 </head>
@@ -85,7 +130,8 @@
       <label for="current-codes">Current Codes<br/>(column B)</label>
       <textarea id="current-codes" rows="50" cols="10"></textarea>
 
-      <button onclick="generate()">Generate</button>
+      <button onclick="generateFromDocument()">Generate</button>
+      <!-- <button onclick="test()">Test</button> -->
     </div>
     <div class="column">
       <label for="sacred-codes-1">Deactivated Codes<br/>(column H)</label>
