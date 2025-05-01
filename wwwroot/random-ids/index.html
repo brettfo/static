@@ -46,7 +46,7 @@
       // generate all possible ids as `candidateIds`
       const candidateIds = new Set([]);
       const shortCodeLength = 4;
-      const codeLength = 5;
+      const codeLength = parseInt(document.getElementById('code-length-select').value);
       const maxCodeValue = Math.pow(10, codeLength) - 1;
       for (let candidateId = 0; candidateId <= maxCodeValue; candidateId++) {
         candidateIds.add(String(candidateId).padStart(codeLength, '0'));
@@ -127,18 +127,23 @@
 <body>
   <div class="row">
     <div class="column">
-      <label for="current-codes">Current Codes<br/>(column B)</label>
+      <label for="current-codes">Current Codes<br />(column B)</label>
       <textarea id="current-codes" rows="50" cols="10"></textarea>
 
+      <label for="code-length-select">Code Length</label>
+      <select name="code-length" id="code-length-select">
+        <option value="4" selected>4</option>
+        <option value="5">5</option>
+      </select>
       <button onclick="generateFromDocument()">Generate</button>
       <!-- <button onclick="test()">Test</button> -->
     </div>
     <div class="column">
-      <label for="sacred-codes-1">Deactivated Codes<br/>(column H)</label>
+      <label for="sacred-codes-1">Deactivated Codes<br />(column H)</label>
       <textarea id="sacred-codes-1" rows="50" cols="10"></textarea>
     </div>
     <div class="column">
-      <label for="sacred-codes-2">Sacred Codes<br/>(column K)</label>
+      <label for="sacred-codes-2">Sacred Codes<br />(column K)</label>
       <textarea id="sacred-codes-2" rows="50" cols="10"></textarea>
     </div>
     <div class="column">
